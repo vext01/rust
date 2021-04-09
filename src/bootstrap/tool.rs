@@ -218,10 +218,6 @@ impl Step for ToolBuild {
                 builder.cargo_out(compiler, self.mode, target).join(exe(tool, compiler.host));
             let bin = builder.tools_dir(compiler).join(exe(tool, compiler.host));
             builder.copy(&cargo_out, &bin);
-            // Also ensure the tool is present in the sysroot so that it can be invoked from rustup
-            // linked toolchains.
-            let stage_bin = builder.sysroot(compiler).join("bin").join(exe(tool, compiler.host));
-            builder.copy(&bin, &stage_bin);
             Some(bin)
         }
     }
@@ -729,13 +725,7 @@ macro_rules! tool_extended {
 tool_extended!((self, builder),
     Cargofmt, rustfmt, "src/tools/rustfmt", "cargo-fmt", stable=true, {};
     CargoClippy, clippy, "src/tools/clippy", "cargo-clippy", stable=true, in_tree=true, {};
-    Clippy, clippy, "src/tools/clippy", "clippy-driver", stable=true, in_tree=true, {
-        builder.ensure(CargoClippy {
-            compiler: self.compiler,
-            target: self.target,
-            extra_features: Vec::new(),
-        });
-    };
+    Clippy, clippy, "src/tools/clippy", "clippy-driver", stable=true, in_tree=true, {};
     Miri, miri, "src/tools/miri", "miri", stable=false, {};
     CargoMiri, miri, "src/tools/miri/cargo-miri", "cargo-miri", stable=false, {};
     Rls, rls, "src/tools/rls", "rls", stable=true, {
