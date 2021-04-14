@@ -1127,6 +1127,15 @@ impl Step for Assemble {
         let compiler = builder.rustc(target_compiler);
         builder.copy(&rustc, &compiler);
 
+        // Ensure extended tools are linked into the sysroot too.
+        dbg!(builder.tools_dir(target_compiler));
+        for tool in std::fs::read_dir(builder.tools_dir(target_compiler)).unwrap() {
+            let tool_path = tool.unwrap().path();
+            let tool_basename = tool_path.iter().last().unwrap();
+            dbg!(&tool_path, &bindir.join(tool_basename));
+            builder.copy(&tool_path, &bindir.join(tool_basename));
+        }
+
         target_compiler
     }
 }
